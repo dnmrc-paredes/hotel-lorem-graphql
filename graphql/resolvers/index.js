@@ -23,7 +23,7 @@ const root = {
 
         return createdRoom
     },
-    createUser: async (args, next) => {
+    createUser: async (args) => {
         try {
 
             const hashedPassword = await bcrypt.hash(args.password, 10)
@@ -52,7 +52,7 @@ const root = {
         }
 
     },
-    loginUser: async args => {
+    loginUser: async (args, req) => {
         try {
             const logginInUser = await User.findOne({email: args.email})
 
@@ -61,6 +61,7 @@ const root = {
             if (result) {
                 const {firstName, lastName, _id} = logginInUser
                 const token = jwt.sign({id: logginInUser._id}, process.env.JWT_KEY)
+                req.session.token = token
                 return {userID: _id, firstName, lastName, token}
             } else {
                 throw Error (`Email or Password Invalid`)
