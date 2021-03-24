@@ -11,7 +11,18 @@ const schema = buildSchema(`
     type Rooms {
         _id: ID!
         name: String!
+        type: String!
+        price: Int!
+        maxPersons: Int!
+        description: String!
         rating: Int!
+    }
+
+    type BookedRooms {
+        _id: ID!
+        bookedBy: ID!
+        theBookedRoom: [Rooms]
+        bookAt: String!
     }
 
     type Users {
@@ -29,12 +40,16 @@ const schema = buildSchema(`
         firstName: String!
         lastName: String!
         token: String!
+        isAdmin: Boolean
     }
 
     type Mutation {
         createRoom(
             name: String!
-            rating: Int!
+            type: String!
+            price: Int!
+            maxPersons: Int!
+            description: String!
         ): Rooms
 
         createUser(
@@ -49,6 +64,13 @@ const schema = buildSchema(`
             email: String!
             password: String!
         ): Users
+
+        bookARoom(
+            bookedBy: ID!
+            theBookedRoom: ID!
+            bookAt: String!
+        ): BookedRooms
+
     }
 
 `)

@@ -9,6 +9,13 @@ const userSchema = new mongoose.Schema({
         unique: true
     },
     password: String,
+    isAdmin: Boolean,
+    roomsBooked: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'BookedRoom'
+        }
+    ],
     hotelRated: [
         {
             type: mongoose.Schema.Types.ObjectId,
