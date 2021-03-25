@@ -39,6 +39,7 @@ const schema = buildSchema(`
         userID: String!
         firstName: String!
         lastName: String!
+        roomsBooked: [BookedRooms]!
         token: String!
         isAdmin: Boolean
     }

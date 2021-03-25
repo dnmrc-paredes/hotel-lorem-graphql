@@ -63,6 +63,10 @@ const root = {
     createUser: async (args) => {
         try {
 
+            if (args.firstName === "" || args.lastName === "" || args.email === "" || args.password === "" || args.username === "" ) {
+                throw new Error (`Please input all fields.`)
+            }
+
             const hashedPassword = await bcrypt.hash(args.password, 10)
 
             const upcomingUser = await new User ({
@@ -91,15 +95,19 @@ const root = {
     },
     loginUser: async (args, req) => {
         try {
-            const logginInUser = await User.findOne({email: args.email})
+            const logginInUser = await User.findOne({email: args.email}).populate('roomsBooked').populate({
+                path: 'roomsBooked',
+                populate: 'theBookedRoom'
+            })
 
             const result = await bcrypt.compare(args.password, logginInUser.password)
 
             if (result) {
-                const {firstName, lastName, _id, isAdmin} = logginInUser
+                const {firstName, lastName, _id, isAdmin, roomsBooked} = logginInUser
                 const token = jwt.sign({id: logginInUser._id}, process.env.JWT_KEY)
                 req.session.token = token
-                return {userID: _id, firstName, lastName, token, isAdmin}
+
+                return {userID: _id, firstName, lastName, token, isAdmin, roomsBooked}
             } else {
                 throw Error (`Email or Password Invalid.`)
             }

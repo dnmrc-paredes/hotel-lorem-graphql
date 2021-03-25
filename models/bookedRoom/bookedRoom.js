@@ -11,7 +11,7 @@ const bookedRoomSchema = new mongoose.Schema({
             ref: 'Room'
         }
     ],
-    bookAt: Date
+    bookAt: String
 })
 
 const BookedRoom = new mongoose.model(`BookedRoom`, bookedRoomSchema)
