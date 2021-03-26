@@ -11,7 +11,9 @@ const bookedRoomSchema = new mongoose.Schema({
             ref: 'Room'
         }
     ],
-    bookAt: String
+    bookAt: String,
+    isCancelled: Boolean,
+    isDone: Boolean
 })
 
 const BookedRoom = new mongoose.model(`BookedRoom`, bookedRoomSchema)

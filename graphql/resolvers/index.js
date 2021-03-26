@@ -1,7 +1,6 @@
 const bcrypt = require(`bcrypt`)
 const jwt = require(`jsonwebtoken`)
 
-const authJWT = require(`../../auth/auth`)
 const User = require(`../../models/users/user`)
 const Room = require(`../../models/rooms/room`)
 const BookedRoom = require(`../../models/bookedRoom/bookedRoom`)
@@ -16,7 +15,10 @@ const root = {
             token = req.headers.auth.split(` `)[1]
 
             jwt.verify(token, process.env.JWT_KEY)
-            const allRooms = await Room.find()
+            const allRooms = await Room.find().populate('userWhoBooked').populate({
+                path: 'userWhoBooked',
+                populate: 'bookedBy'
+            })
             return allRooms
         }
 
@@ -127,13 +129,23 @@ const root = {
 
             const decoded = jwt.verify(token, process.env.JWT_KEY)
 
+            const roomID = args.theBookedRoom
+
             const newlyBookedRoom = new BookedRoom({
                 bookedBy: args.bookedBy,
                 theBookedRoom: args.theBookedRoom,
-                bookAt: args.bookAt
+                bookAt: args.bookAt,
+                isCancelled: false,
+                isDone: false
             })
 
             const savedBookedRoom = await newlyBookedRoom.save()
+
+            const theChosenRoom = await Room.findOneAndUpdate({_id: roomID}, {
+                $addToSet: {
+                    userWhoBooked: savedBookedRoom._id
+                }
+            })
             
             const currentUser = await User.findOneAndUpdate({_id: decoded.id}, {
                 $addToSet: {
@@ -141,9 +153,9 @@ const root = {
                 }
             })
 
-            const {_id , bookedBy, theBookedRoom, bookAt } = savedBookedRoom
+            const {_id , bookedBy, theBookedRoom, bookAt, isCancelled, isDone } = savedBookedRoom
 
-            return {_id, bookedBy, theBookedRoom, bookAt}
+            return {_id, bookedBy, theBookedRoom, bookAt, isCancelled, isDone}
             
             }
 

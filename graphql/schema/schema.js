@@ -5,7 +5,7 @@ const schema = buildSchema(`
     type Query {
         allRooms: [Rooms]
         allUsers : [Users]
-        loginUser(email: String! password: String!): authData
+        loginUser(email: String! password: String!): Users
     }
 
     type Rooms {
@@ -16,23 +16,28 @@ const schema = buildSchema(`
         maxPersons: Int!
         description: String!
         rating: Int!
+        userWhoBooked: [BookedRooms]
     }
 
     type BookedRooms {
         _id: ID!
-        bookedBy: ID!
+        bookedBy: Users
         theBookedRoom: [Rooms]
         bookAt: String!
+        isCancelled: Boolean
+        isDone: Boolean
     }
 
     type Users {
-        _id: ID!
+        userID: ID!
         firstName: String!
         lastName: String!
         username: String!
         email: String!
         password: String!
         token: String!
+        isAdmin: Boolean
+        roomsBooked: [BookedRooms]!
     }
 
     type authData {

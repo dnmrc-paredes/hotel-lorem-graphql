@@ -6,6 +6,12 @@ const roomSchema = new mongoose.Schema({
     maxPersons: Number,
     type: String,
     price: Number,
+    userWhoBooked: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'BookedRoom'
+        }
+    ],
     rating: [
         {
             type: mongoose.Schema.Types.ObjectId,
