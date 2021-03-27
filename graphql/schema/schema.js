@@ -77,6 +77,14 @@ const schema = buildSchema(`
             bookAt: String!
         ): BookedRooms
 
+        cancelRoom(
+            roomID: ID!
+        ): Rooms
+
+        markAsDone(
+            roomID: ID!
+        ): Rooms
+
     }
 
 `)

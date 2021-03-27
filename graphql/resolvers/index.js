@@ -166,6 +166,58 @@ const root = {
         } catch (err) {
             console.log(err)
         }
+    },
+    cancelRoom: async (args, req) => {
+        
+        let token
+
+        try {
+
+            if (req.headers.auth && req.headers.auth.startsWith(`Bearer`)) {
+            token = req.headers.auth.split(` `)[1]
+
+            jwt.verify(token, process.env.JWT_KEY)
+
+            const cancellingBookedRoom = await BookedRoom.findOneAndUpdate({_id: args.roomID}, {isCancelled: true})
+            
+            return cancellingBookedRoom.name
+
+        }
+
+            if (!token) {
+                throw Error (`Unauthorized.`)
+            }
+            
+        } catch (error) {
+            console.log(err)
+        }
+
+    },
+    markAsDone: async (args, req) => {
+
+        let token
+
+        try {
+
+            if (req.headers.auth && req.headers.auth.startsWith(`Bearer`)) {
+            token = req.headers.auth.split(` `)[1]
+
+            jwt.verify(token, process.env.JWT_KEY)
+
+            const markAsDoneRoom = await BookedRoom.findOneAndUpdate({_id: args.roomID}, {isDone: true})
+            
+            return markAsDoneRoom.name
+
+        }
+
+            if (!token) {
+                throw Error (`Unauthorized.`)
+            }
+            
+        } catch (error) {
+            console.log(err)
+        }
+
     }
 }
 
