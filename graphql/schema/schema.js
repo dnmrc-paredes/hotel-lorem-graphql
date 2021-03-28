@@ -85,6 +85,10 @@ const schema = buildSchema(`
             roomID: ID!
         ): Rooms
 
+        removeRoom(
+            roomID: ID!
+        ): Rooms
+
     }
 
 `)

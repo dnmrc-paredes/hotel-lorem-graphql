@@ -218,6 +218,32 @@ const root = {
             console.log(err)
         }
 
+    },
+    removeRoom: async (args, req) => {
+
+        let token
+
+        try {
+
+            if (req.headers.auth && req.headers.auth.startsWith(`Bearer`)) {
+            token = req.headers.auth.split(` `)[1]
+
+            jwt.verify(token, process.env.JWT_KEY)
+
+            const removeRoom = await BookedRoom.findOneAndDelete({_id: args.roomID})
+            
+            return removeRoom.name
+
+        }
+
+            if (!token) {
+                throw Error (`Unauthorized.`)
+            }
+            
+        } catch (error) {
+            console.log(err)
+        }
+
     }
 }
 
