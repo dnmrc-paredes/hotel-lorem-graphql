@@ -38,22 +38,21 @@ const root = {
         let token
 
         if (req.headers.auth && req.headers.auth.startsWith(`Bearer`)) {
-           token = req.headers.auth.split(` `)[1]
+            token = req.headers.auth.split(` `)[1]
 
-           jwt.verify(token, process.env.JWT_KEY)
+            jwt.verify(token, process.env.JWT_KEY)
 
-           const creatingRoom = await new Room ({
-            name: args.name,
-            rating: args.rating,
-            price: args.price,
-            description: args.description,
-            type: args.type,
-            maxPersons: args.maxPersons
-        })
+            const creatingRoom = await new Room ({
+                name: args.name,
+                price: args.price,
+                description: args.description,
+                type: args.type,
+                maxPersons: args.maxPersons
+            })
 
-        const createdRoom = await creatingRoom.save()
+            const createdRoom = await creatingRoom.save()
 
-        return createdRoom
+            return createdRoom
            
         }
 
@@ -233,6 +232,32 @@ const root = {
             const removeRoom = await BookedRoom.findOneAndDelete({_id: args.roomID})
             
             return removeRoom.name
+
+        }
+
+            if (!token) {
+                throw Error (`Unauthorized.`)
+            }
+            
+        } catch (error) {
+            console.log(err)
+        }
+
+    },
+    deleteRoom: async (args, req) => {
+
+        let token
+
+        try {
+
+            if (req.headers.auth && req.headers.auth.startsWith(`Bearer`)) {
+            token = req.headers.auth.split(` `)[1]
+
+            jwt.verify(token, process.env.JWT_KEY)
+
+            const deleteRoom = await Room.findOneAndDelete({_id: args.roomID})
+
+            return deleteRoom.name
 
         }
 

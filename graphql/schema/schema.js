@@ -10,7 +10,7 @@ const schema = buildSchema(`
 
     type Rooms {
         _id: ID!
-        name: String!
+        name: String
         type: String!
         price: Int!
         maxPersons: Int!
@@ -86,6 +86,10 @@ const schema = buildSchema(`
         ): Rooms
 
         removeRoom(
+            roomID: ID!
+        ): Rooms
+
+        deleteRoom(
             roomID: ID!
         ): Rooms
 
