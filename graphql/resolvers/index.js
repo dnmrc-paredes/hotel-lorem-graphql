@@ -31,8 +31,56 @@ const root = {
         const allUsers = await User.find()
         return allUsers
     },
+    loginUser: async (args, req) => {
+        try {
+            const logginInUser = await User.findOne({email: args.email}).populate('roomsBooked').populate({
+                path: 'roomsBooked',
+                populate: 'theBookedRoom'
+            })
+
+            const result = await bcrypt.compare(args.password, logginInUser.password)
+
+            if (result) {
+                const {firstName, lastName, _id, isAdmin, roomsBooked} = logginInUser
+                const token = jwt.sign({id: logginInUser._id}, process.env.JWT_KEY)
+                req.session.token = token
+
+                return {userID: _id, firstName, lastName, token, isAdmin, roomsBooked}
+            } else {
+                throw Error (`Email or Password Invalid.`)
+            }
+
+        } catch (err) {
+            throw Error (`Email or Password Invalid.`)
+        }
+
+    },
+    userInfo: async (args, req) => {
+
+        let token
+
+        if (req.headers.auth && req.headers.auth.startsWith(`Bearer`)) {
+            token = req.headers.auth.split(` `)[1]
+
+            jwt.verify(token, process.env.JWT_KEY)
+            const currentUser = await User.findOne({_id: args.userID}).populate('roomsBooked').populate({
+                path: 'roomsBooked',
+                populate: 'theBookedRoom'
+            })
+            const {firstName, lastName, _id, isAdmin, roomsBooked, username, email} = currentUser
+
+            return {userID: _id, firstName, email, lastName, isAdmin, roomsBooked, username}
+
+        }
+
+        if (!token) {
+            throw Error (`Unauthorized.`)
+        }
+
+    },
 
     // MUTATIONS
+
     createRoom:  async (args, req) => {
         
         let token
@@ -91,30 +139,6 @@ const root = {
             }
 
             return err
-        }
-
-    },
-    loginUser: async (args, req) => {
-        try {
-            const logginInUser = await User.findOne({email: args.email}).populate('roomsBooked').populate({
-                path: 'roomsBooked',
-                populate: 'theBookedRoom'
-            })
-
-            const result = await bcrypt.compare(args.password, logginInUser.password)
-
-            if (result) {
-                const {firstName, lastName, _id, isAdmin, roomsBooked} = logginInUser
-                const token = jwt.sign({id: logginInUser._id}, process.env.JWT_KEY)
-                req.session.token = token
-
-                return {userID: _id, firstName, lastName, token, isAdmin, roomsBooked}
-            } else {
-                throw Error (`Email or Password Invalid.`)
-            }
-
-        } catch (err) {
-            throw Error (`Email or Password Invalid.`)
         }
 
     },
@@ -255,9 +279,16 @@ const root = {
 
             jwt.verify(token, process.env.JWT_KEY)
 
-            const deleteRoom = await Room.findOneAndDelete({_id: args.roomID})
+            const deleteRoom = await Room.findOne({_id: args.roomID})
 
-            return deleteRoom.name
+            deleteRoom.userWhoBooked.map(async (eachBookedRoom) => {
+                await BookedRoom.findOneAndDelete({_id: eachBookedRoom})
+            })
+
+            const deleteTheActualRoom = await Room.findOneAndDelete({_id: args.roomID})
+
+            return deleteTheActualRoom.name
+
 
         }
 

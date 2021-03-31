@@ -6,6 +6,7 @@ const schema = buildSchema(`
         allRooms: [Rooms]
         allUsers : [Users]
         loginUser(email: String! password: String!): Users
+        userInfo(userID: ID!): Users
     }
 
     type Rooms {
@@ -29,24 +30,15 @@ const schema = buildSchema(`
     }
 
     type Users {
-        userID: ID!
-        firstName: String!
-        lastName: String!
-        username: String!
-        email: String!
-        password: String!
-        token: String!
+        userID: ID
+        firstName: String
+        lastName: String
+        username: String
+        email: String
+        password: String
+        token: String
         isAdmin: Boolean
-        roomsBooked: [BookedRooms]!
-    }
-
-    type authData {
-        userID: String!
-        firstName: String!
-        lastName: String!
-        roomsBooked: [BookedRooms]!
-        token: String!
-        isAdmin: Boolean
+        roomsBooked: [BookedRooms]
     }
 
     type Mutation {
@@ -62,11 +54,6 @@ const schema = buildSchema(`
             firstName: String!
             lastName: String!
             username: String!
-            email: String!
-            password: String!
-        ): authData
-
-        loginUser(
             email: String!
             password: String!
         ): Users
