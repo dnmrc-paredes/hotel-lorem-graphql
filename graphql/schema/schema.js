@@ -16,8 +16,15 @@ const schema = buildSchema(`
         price: Int!
         maxPersons: Int!
         description: String!
-        rating: Int!
+        rating: [Review]
         userWhoBooked: [BookedRooms]
+    }
+
+    type Review {
+        _id: ID!
+        rating: Int
+        ratingBy: Users
+        theRoomRated: Rooms
     }
 
     type BookedRooms {
@@ -39,6 +46,7 @@ const schema = buildSchema(`
         token: String
         isAdmin: Boolean
         roomsBooked: [BookedRooms]
+        roomsRated: [Review]
     }
 
     type Mutation {
@@ -79,6 +87,16 @@ const schema = buildSchema(`
         deleteRoom(
             roomID: ID!
         ): Rooms
+
+        unCancelRoom(
+            roomID: ID!
+        ): Rooms
+
+        rateRoom(
+            userID: ID!
+            roomID: ID!
+            rating: Int!
+        ): Review
 
     }
 

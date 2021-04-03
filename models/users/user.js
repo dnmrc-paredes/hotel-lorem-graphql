@@ -16,10 +16,10 @@ const userSchema = new mongoose.Schema({
             ref: 'BookedRoom'
         }
     ],
-    hotelRated: [
+    roomsRated: [
         {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'Room'
+            ref: 'Rating'
         }
     ]
 })

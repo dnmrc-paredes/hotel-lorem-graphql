@@ -4,6 +4,7 @@ const jwt = require(`jsonwebtoken`)
 const User = require(`../../models/users/user`)
 const Room = require(`../../models/rooms/room`)
 const BookedRoom = require(`../../models/bookedRoom/bookedRoom`)
+const Rating = require(`../../models/rating/rating`)
 
 const root = {
     // QUERIES
@@ -18,7 +19,8 @@ const root = {
             const allRooms = await Room.find().populate('userWhoBooked').populate({
                 path: 'userWhoBooked',
                 populate: 'bookedBy'
-            })
+            }).populate('rating')
+
             return allRooms
         }
 
@@ -63,13 +65,18 @@ const root = {
             token = req.headers.auth.split(` `)[1]
 
             jwt.verify(token, process.env.JWT_KEY)
-            const currentUser = await User.findOne({_id: args.userID}).populate('roomsBooked').populate({
+
+            const currentUser = await User.findOne({_id: args.userID}).populate('roomsBooked').populate('roomsRated').populate({
                 path: 'roomsBooked',
                 populate: 'theBookedRoom'
+            }).populate({
+                path: 'roomsRated',
+                populate: 'ratingBy'
             })
-            const {firstName, lastName, _id, isAdmin, roomsBooked, username, email} = currentUser
 
-            return {userID: _id, firstName, email, lastName, isAdmin, roomsBooked, username}
+            const {firstName, lastName, _id, isAdmin, roomsBooked, username, email, roomsRated} = currentUser
+
+            return {userID: _id, firstName, email, lastName, isAdmin, roomsBooked, username, roomsRated}
 
         }
 
@@ -81,7 +88,7 @@ const root = {
 
     // MUTATIONS
 
-    createRoom:  async (args, req) => {
+    createRoom: async (args, req) => {
         
         let token
 
@@ -89,6 +96,14 @@ const root = {
             token = req.headers.auth.split(` `)[1]
 
             jwt.verify(token, process.env.JWT_KEY)
+
+            if (isNaN(args.price)) {
+                throw new Error ('Price must be a number.')
+            }
+
+            if (isNaN(args.maxPersons)) {
+                throw new Error (`Max Persons must be a number.`)
+            }
 
             const creatingRoom = await new Room ({
                 name: args.name,
@@ -176,7 +191,7 @@ const root = {
                 }
             })
 
-            const {_id , bookedBy, theBookedRoom, bookAt, isCancelled, isDone } = savedBookedRoom
+            const {_id, bookedBy, theBookedRoom, bookAt, isCancelled, isDone } = savedBookedRoom
 
             return {_id, bookedBy, theBookedRoom, bookAt, isCancelled, isDone}
             
@@ -289,6 +304,79 @@ const root = {
 
             return deleteTheActualRoom.name
 
+
+        }
+
+            if (!token) {
+                throw Error (`Unauthorized.`)
+            }
+            
+        } catch (error) {
+            console.log(err)
+        }
+
+    },
+    unCancelRoom: async (args, req) => {
+        
+        let token
+
+        try {
+
+            if (req.headers.auth && req.headers.auth.startsWith(`Bearer`)) {
+            token = req.headers.auth.split(` `)[1]
+
+            jwt.verify(token, process.env.JWT_KEY)
+
+            const cancellingBookedRoom = await BookedRoom.findOneAndUpdate({_id: args.roomID}, {isCancelled: false})
+            
+            return cancellingBookedRoom.name
+
+        }
+
+            if (!token) {
+                throw Error (`Unauthorized.`)
+            }
+            
+        } catch (error) {
+            console.log(err)
+        }
+
+    },
+    rateRoom: async (args, req) => {
+
+        let token
+
+        try {
+
+            const { userID, roomID, rating } = args
+
+            if (req.headers.auth && req.headers.auth.startsWith(`Bearer`)) {
+            token = req.headers.auth.split(` `)[1]
+
+            jwt.verify(token, process.env.JWT_KEY)
+
+            const newRating = await new Rating({
+                rating,
+                ratingBy: userID,
+                theRoomRated: roomID
+            })
+
+            await newRating.save()
+
+            const theRoomToBeRated = await Room.findOneAndUpdate({_id: roomID}, {
+                $addToSet: {
+                    rating: newRating._id
+                }
+            })
+
+            const currentLoginUser = await User.findOneAndUpdate({_id: userID}, {
+                $addToSet: {
+                    roomsRated: newRating._id
+                }
+            })
+
+            return newRating.rating, newRating._id, newRating.ratingBy, newRating.theRoomRated
+            
 
         }
 
