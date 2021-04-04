@@ -68,11 +68,23 @@ const root = {
 
             const currentUser = await User.findOne({_id: args.userID}).populate('roomsBooked').populate('roomsRated').populate({
                 path: 'roomsBooked',
-                populate: 'theBookedRoom'
+                populate: 'theBookedRoom',
             }).populate({
                 path: 'roomsRated',
-                populate: 'ratingBy'
+                populate: 'ratingBy',
             })
+
+            // .populate({
+            //     path: 'roomsRated',
+            //     populate: 'ratingBy',
+            //     populate: {
+            //         path: 'roomsBooked',
+            //         populate: {
+            //             path: 'theBookedRoom',
+            //             populate: 'rating'
+            //     }
+            //     }
+            // })
 
             const {firstName, lastName, _id, isAdmin, roomsBooked, username, email, roomsRated} = currentUser
 
@@ -174,7 +186,8 @@ const root = {
                 theBookedRoom: args.theBookedRoom,
                 bookAt: args.bookAt,
                 isCancelled: false,
-                isDone: false
+                isDone: false,
+                isRated: false
             })
 
             const savedBookedRoom = await newlyBookedRoom.save()
@@ -191,9 +204,9 @@ const root = {
                 }
             })
 
-            const {_id, bookedBy, theBookedRoom, bookAt, isCancelled, isDone } = savedBookedRoom
+            const {_id, bookedBy, theBookedRoom, bookAt, isCancelled, isDone, isRated } = savedBookedRoom
 
-            return {_id, bookedBy, theBookedRoom, bookAt, isCancelled, isDone}
+            return {_id, bookedBy, theBookedRoom, bookAt, isCancelled, isDone, isRated}
             
             }
 
@@ -348,7 +361,7 @@ const root = {
 
         try {
 
-            const { userID, roomID, rating } = args
+            const { userID, roomID, rating, theRoomToUpdate } = args
 
             if (req.headers.auth && req.headers.auth.startsWith(`Bearer`)) {
             token = req.headers.auth.split(` `)[1]
@@ -374,6 +387,9 @@ const root = {
                     roomsRated: newRating._id
                 }
             })
+
+            const currentBooked = await BookedRoom.findOneAndUpdate({_id: theRoomToUpdate}, {isRated: true})
+            const currentBooked2 = await BookedRoom.findOneAndUpdate({_id: theRoomToUpdate}, {rating: newRating._id})
 
             return newRating.rating, newRating._id, newRating.ratingBy, newRating.theRoomRated
             

@@ -11,9 +11,14 @@ const bookedRoomSchema = new mongoose.Schema({
             ref: 'Room'
         }
     ],
+    rating: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Rating'
+    },
     bookAt: String,
     isCancelled: Boolean,
-    isDone: Boolean
+    isDone: Boolean,
+    isRated: Boolean
 })
 
 const BookedRoom = new mongoose.model(`BookedRoom`, bookedRoomSchema)

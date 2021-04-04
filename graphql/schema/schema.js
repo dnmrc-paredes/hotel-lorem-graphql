@@ -31,9 +31,11 @@ const schema = buildSchema(`
         _id: ID!
         bookedBy: Users
         theBookedRoom: [Rooms]
+        rating: Review
         bookAt: String!
         isCancelled: Boolean
         isDone: Boolean
+        isRated: Boolean
     }
 
     type Users {
@@ -96,6 +98,7 @@ const schema = buildSchema(`
             userID: ID!
             roomID: ID!
             rating: Int!
+            theRoomToUpdate: ID!
         ): Review
 
     }
