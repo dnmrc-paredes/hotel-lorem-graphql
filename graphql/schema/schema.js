@@ -101,6 +101,17 @@ const schema = buildSchema(`
             theRoomToUpdate: ID!
         ): Review
 
+        editRate(
+            reviewID: ID!
+            newRating: Int!
+        ): Review
+
+        editMe(
+            userID: ID!
+            firstName: String!
+            lastName: String!
+        ): Users
+
     }
 
 `)

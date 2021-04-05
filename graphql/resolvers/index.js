@@ -404,6 +404,65 @@ const root = {
             console.log(err)
         }
 
+    },
+    editRate: async (args, req) => {
+
+        let token
+
+        try {
+
+            const { reviewID, newRating } = args
+
+            if (req.headers.auth && req.headers.auth.startsWith(`Bearer`)) {
+            token = req.headers.auth.split(` `)[1]
+
+            jwt.verify(token, process.env.JWT_KEY)
+
+            const currentReview = await Rating.findOneAndUpdate({_id: reviewID}, {rating: newRating})
+
+            return currentReview.rating
+
+        }
+
+            if (!token) {
+                throw Error (`Unauthorized.`)
+            }
+            
+        } catch (error) {
+            console.log(err)
+        }
+
+    },
+    editMe: async (args, req) => {
+
+        let token
+
+        try {
+
+            const {userID, firstName, lastName} = args
+
+            if (req.headers.auth && req.headers.auth.startsWith(`Bearer`)) {
+            token = req.headers.auth.split(` `)[1]
+
+            jwt.verify(token, process.env.JWT_KEY)
+
+            const currentUser = await User.findOneAndUpdate({_id: userID}, {
+                firstName,
+                lastName
+            })
+
+            return currentUser.firstName
+            
+        }
+
+            if (!token) {
+                throw Error (`Unauthorized.`)
+            }
+            
+        } catch (error) {
+            console.log(err)
+        }
+
     }
 }
 
